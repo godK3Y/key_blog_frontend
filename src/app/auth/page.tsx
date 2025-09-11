@@ -1,16 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
+import AuthService from "@/services/auth.service";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleLogin = async (email: string, password: string) => {
-    // TODO: Replace with your API call
-    console.log("Login:", { email, password });
-    // Example: await fetch('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) })
+    try {
+      const result = await AuthService.login({ email, password });
+      if (result?.success) {
+        const redirect = searchParams.get("redirect") || "/";
+        router.push(redirect);
+      } else {
+        throw new Error("Invalid credentials");
+      }
+    } catch (err) {
+      console.error("Login failed", err);
+      throw err;
+    }
   };
 
   const handleRegister = async (
@@ -18,9 +31,15 @@ export default function AuthPage() {
     password: string,
     name: string
   ) => {
-    // TODO: Replace with your API call
-    console.log("Register:", { email, password, name });
-    // Example: await fetch('/api/auth/register', { method: 'POST', body: JSON.stringify({ email, password, name }) })
+    try {
+      await AuthService.register({ email, password, name });
+      console.log("Registered successfully");
+      // After registration, switch to login form
+      setIsLogin(true);
+    } catch (err) {
+      console.error("Register failed", err);
+      throw err;
+    }
   };
 
   return (
