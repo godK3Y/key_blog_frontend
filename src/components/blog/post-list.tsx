@@ -1,6 +1,6 @@
 "use client";
 
-import type { BlogPost } from "@/lib/blog";
+import type { PostItem } from "@/services/post.service";
 import {
   Card,
   CardContent,
@@ -13,10 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 
 interface PostListProps {
-  posts: BlogPost[];
-  onEdit?: (post: BlogPost) => void;
-  onDelete?: (post: BlogPost) => void;
-  onView?: (post: BlogPost) => void;
+  posts: PostItem[];
+  onEdit?: (post: PostItem) => void;
+  onDelete?: (post: PostItem) => void;
+  onView?: (post: PostItem) => void;
   showActions?: boolean;
 }
 
@@ -38,16 +38,21 @@ export function PostList({
   return (
     <div className="space-y-6">
       {posts.map((post) => (
-        <Card key={post.id} className="hover:shadow-md transition-shadow">
+        <Card key={post._id} className="hover:shadow-md transition-shadow">
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <CardTitle className="text-xl">{post.title}</CardTitle>
                 <CardDescription>
-                  By {post.author.name} •{" "}
-                  {formatDistanceToNow(new Date(post.createdAt), {
-                    addSuffix: true,
-                  })}
+                  By{" "}
+                  {typeof post.author === "string"
+                    ? post.author
+                    : post.author?.name || "Unknown"}{" "}
+                  •{" "}
+                  {post.createdAt &&
+                    formatDistanceToNow(new Date(post.createdAt), {
+                      addSuffix: true,
+                    })}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -58,7 +63,9 @@ export function PostList({
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">{post.excerpt}</p>
+            <p className="text-muted-foreground mb-4">
+              {post.content.substring(0, 150)}...
+            </p>
 
             {showActions && (
               <div className="flex gap-2">

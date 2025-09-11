@@ -9,10 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import type { BlogPost } from "@/lib/blog";
+import type { PostItem } from "@/services/post.service";
 
 interface PostFormProps {
-  post?: BlogPost;
+  post?: PostItem;
   onSubmit: (data: {
     title: string;
     content: string;
@@ -31,7 +31,9 @@ export function PostForm({
 }: PostFormProps) {
   const [title, setTitle] = useState(post?.title || "");
   const [content, setContent] = useState(post?.content || "");
-  const [excerpt, setExcerpt] = useState(post?.excerpt || "");
+  const [excerpt, setExcerpt] = useState(
+    post?.content?.substring(0, 150) || ""
+  );
   const [published, setPublished] = useState(post?.published || false);
 
   const handleSubmit = (e: React.FormEvent) => {

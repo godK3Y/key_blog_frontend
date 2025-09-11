@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { BlogService, type BlogPost } from "@/lib/blog";
+import { PostService, type PostItem } from "@/services/post.service";
 import { Header } from "@/components/blog/header";
 import { Footer } from "@/components/blog/footer";
 import { MarkdownRenderer } from "@/components/blog/markdown-renderer";
@@ -14,24 +14,33 @@ import { formatDistanceToNow, format } from "date-fns";
 export default function PostPage() {
   const params = useParams();
   const router = useRouter();
-  const [post, setPost] = useState<BlogPost | null>(null);
+  const [post, setPost] = useState<PostItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const slug = params.slug as string;
     if (slug) {
-      // Initialize demo posts first
-      BlogService.initializeDemoPosts();
+      const loadPost = async () => {
+        try {
+          const foundPost = await PostService.findOneBySlug(slug);
+          if (foundPost && foundPost.published) {
+            setPost(foundPost);
+          } else {
+            setNotFound(true);
+          }
+        } catch (error) {
+          console.error("Failed to load post:", error);
+          setNotFound(true);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-      const foundPost = BlogService.getPostBySlug(slug);
-      if (foundPost && foundPost.published) {
-        setPost(foundPost);
-      } else {
-        setNotFound(true);
-      }
+      loadPost();
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [params.slug]);
 
   if (isLoading) {
@@ -99,23 +108,31 @@ export default function PostPage() {
             <div className="flex flex-wrap items-center gap-6 text-muted-foreground">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
-                <span>By {post.author.name}</span>
+                <span>
+                  By{" "}
+                  {typeof post.author === "string"
+                    ? post.author
+                    : post.author?.name || "Unknown"}
+                </span>
               </div>
 
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  {format(new Date(post.createdAt), "MMMM d, yyyy")} •{" "}
-                  {formatDistanceToNow(new Date(post.createdAt), {
-                    addSuffix: true,
-                  })}
+                  {post.createdAt &&
+                    format(new Date(post.createdAt), "MMMM d, yyyy")}{" "}
+                  •{" "}
+                  {post.createdAt &&
+                    formatDistanceToNow(new Date(post.createdAt), {
+                      addSuffix: true,
+                    })}
                 </span>
               </div>
             </div>
 
-            {post.excerpt && (
+            {post.content && (
               <p className="text-xl text-muted-foreground mt-6 leading-relaxed text-balance">
-                {post.excerpt}
+                {post.content.substring(0, 200)}...
               </p>
             )}
           </header>
@@ -129,7 +146,9 @@ export default function PostPage() {
           <footer className="mt-12 pt-8 border-t">
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                Last updated: {format(new Date(post.updatedAt), "MMMM d, yyyy")}
+                Last updated:{" "}
+                {post.updatedAt &&
+                  format(new Date(post.updatedAt), "MMMM d, yyyy")}
               </div>
 
               <Button variant="outline" onClick={() => router.push("/")}>

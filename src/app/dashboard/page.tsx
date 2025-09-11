@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { BlogService, type BlogPost } from "@/lib/blog";
+import { PostService, type PostItem } from "@/services/post.service";
 import { PostForm } from "@/components/blog/post-form";
 import { PostList } from "@/components/blog/post-list";
 import { Button } from "@/components/ui/button";
@@ -11,21 +11,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [posts, setPosts] = useState<PostItem[]>([]);
+  const [editingPost, setEditingPost] = useState<PostItem | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const mockUser = { id: "demo-user", name: "Demo User" };
 
   useEffect(() => {
-    BlogService.initializeDemoPosts();
     loadPosts();
   }, []);
 
-  const loadPosts = () => {
-    const userPosts = BlogService.getPostsByAuthor(mockUser.id);
-    setPosts(userPosts);
+  const loadPosts = async () => {
+    try {
+      const response = await PostService.findAll({ author: mockUser.id });
+      setPosts(response.items);
+    } catch (error) {
+      console.error("Failed to load posts:", error);
+      setPosts([]);
+    }
   };
 
   const handleCreatePost = async (data: {
@@ -36,12 +40,23 @@ export default function DashboardPage() {
   }) => {
     setIsSubmitting(true);
     try {
-      BlogService.createPost({
-        ...data,
-        author: { id: mockUser.id, name: mockUser.name },
+      const slug = data.title
+        .toLowerCase()
+        .replace(/[^a-z0-9 -]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+      await PostService.create({
+        title: data.title,
+        slug: slug,
+        content: data.content,
+        published: data.published,
+        tags: [],
       });
-      loadPosts();
+      await loadPosts();
       setShowForm(false);
+    } catch (error) {
+      console.error("Failed to create post:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -57,22 +72,40 @@ export default function DashboardPage() {
 
     setIsSubmitting(true);
     try {
-      BlogService.updatePost(editingPost.id, data);
-      loadPosts();
+      const slug = data.title
+        .toLowerCase()
+        .replace(/[^a-z0-9 -]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+      await PostService.update(editingPost._id, {
+        title: data.title,
+        slug: slug,
+        content: data.content,
+        published: data.published,
+        tags: editingPost.tags || [],
+      });
+      await loadPosts();
       setEditingPost(null);
+    } catch (error) {
+      console.error("Failed to update post:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeletePost = (post: BlogPost) => {
+  const handleDeletePost = async (post: PostItem) => {
     if (confirm("Are you sure you want to delete this post?")) {
-      BlogService.deletePost(post.id);
-      loadPosts();
+      try {
+        await PostService.remove(post._id);
+        await loadPosts();
+      } catch (error) {
+        console.error("Failed to delete post:", error);
+      }
     }
   };
 
-  const handleViewPost = (post: BlogPost) => {
+  const handleViewPost = (post: PostItem) => {
     router.push(`/post/${post.slug}`);
   };
 

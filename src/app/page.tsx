@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BlogService, type BlogPost } from "@/lib/blog";
+import { PostService, type PostItem } from "@/services/post.service";
 import { Header } from "@/components/blog/header";
 import { Hero } from "@/components/blog/hero";
 import { PostList } from "@/components/blog/post-list";
@@ -9,24 +9,27 @@ import { Footer } from "@/components/blog/footer";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [posts, setPosts] = useState<PostItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Initialize demo posts and load published posts
-    BlogService.initializeDemoPosts();
-    const publishedPosts = BlogService.getPublishedPosts();
-    setPosts(
-      publishedPosts.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-    );
-    setIsLoading(false);
+    const loadPosts = async () => {
+      try {
+        const response = await PostService.findAll({ published: "true" });
+        setPosts(response.items);
+      } catch (error) {
+        console.error("Failed to load posts:", error);
+        setPosts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPosts();
   }, []);
 
-  const handleViewPost = (post: BlogPost) => {
+  const handleViewPost = (post: PostItem) => {
     router.push(`/post/${post.slug}`);
   };
 
