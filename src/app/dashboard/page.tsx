@@ -18,6 +18,8 @@ export default function DashboardPage() {
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const mockUser = { id: "demo-user", name: "Demo User" };
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/auth");
@@ -35,6 +37,9 @@ export default function DashboardPage() {
   const loadPosts = () => {
     if (user) {
       const userPosts = BlogService.getPostsByAuthor(user.id);
+      setPosts(userPosts);
+    } else {
+      const userPosts = BlogService.getPostsByAuthor(mockUser.id);
       setPosts(userPosts);
     }
   };
@@ -111,9 +116,12 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
-              Welcome, {user?.name}
+              Welcome, {user?.name || mockUser.name}
             </span>
-            <Button variant="outline" onClick={() => router.push("/")}>
+            <Button
+              variant="outline"
+              onClick={() => (window.location.href = "/")}
+            >
               View Blog
             </Button>
             <Button variant="outline" onClick={logout}>
