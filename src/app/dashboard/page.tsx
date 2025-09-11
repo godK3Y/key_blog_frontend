@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/use-auth";
 import { BlogService, type BlogPost } from "@/lib/blog";
 import { PostForm } from "@/components/blog/post-form";
 import { PostList } from "@/components/blog/post-list";
@@ -11,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
@@ -21,27 +19,13 @@ export default function DashboardPage() {
   const mockUser = { id: "demo-user", name: "Demo User" };
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/auth");
-    }
-  }, [isAuthenticated, isLoading, router]);
-
-  useEffect(() => {
-    if (user) {
-      // Initialize demo posts on first load
-      BlogService.initializeDemoPosts();
-      loadPosts();
-    }
-  }, [user]);
+    BlogService.initializeDemoPosts();
+    loadPosts();
+  }, []);
 
   const loadPosts = () => {
-    if (user) {
-      const userPosts = BlogService.getPostsByAuthor(user.id);
-      setPosts(userPosts);
-    } else {
-      const userPosts = BlogService.getPostsByAuthor(mockUser.id);
-      setPosts(userPosts);
-    }
+    const userPosts = BlogService.getPostsByAuthor(mockUser.id);
+    setPosts(userPosts);
   };
 
   const handleCreatePost = async (data: {
@@ -50,13 +34,11 @@ export default function DashboardPage() {
     excerpt: string;
     published: boolean;
   }) => {
-    if (!user) return;
-
     setIsSubmitting(true);
     try {
       BlogService.createPost({
         ...data,
-        author: { id: user.id, name: user.name },
+        author: { id: mockUser.id, name: mockUser.name },
       });
       loadPosts();
       setShowForm(false);
@@ -94,21 +76,6 @@ export default function DashboardPage() {
     router.push(`/post/${post.slug}`);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -116,16 +83,13 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
-              Welcome, {user?.name || mockUser.name}
+              Welcome, {mockUser.name}
             </span>
             <Button
               variant="outline"
               onClick={() => (window.location.href = "/")}
             >
               View Blog
-            </Button>
-            <Button variant="outline" onClick={logout}>
-              Logout
             </Button>
           </div>
         </div>
