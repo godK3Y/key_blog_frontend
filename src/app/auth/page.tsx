@@ -15,7 +15,7 @@ export default function AuthPage() {
     try {
       const result = await AuthService.login({ email, password });
       if (result?.success) {
-        const redirect = searchParams.get("redirect") || "/";
+        const redirect = searchParams.get("redirect") || "/dashboard";
         router.push(redirect);
       } else {
         throw new Error("Invalid credentials");

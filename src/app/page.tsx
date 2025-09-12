@@ -7,6 +7,7 @@ import { Hero } from "@/components/blog/hero";
 import { PostList } from "@/components/blog/post-list";
 import { Footer } from "@/components/blog/footer";
 import { useRouter } from "next/navigation";
+import { PostForm } from "@/components/blog/post-form";
 
 export default function HomePage() {
   const [posts, setPosts] = useState<PostItem[]>([]);
@@ -49,12 +50,12 @@ export default function HomePage() {
       <Header />
 
       <main className="flex-1">
-        <Hero />
+        {/* <Hero /> */}
 
         <section id="posts" className="py-16 px-4">
           <div className="container mx-auto max-w-4xl">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Latest Posts</h2>
+              <h2 className="text-3xl font-bold mb-4">new posts today</h2>
               <p className="text-muted-foreground">
                 Discover the latest articles and insights from our community
               </p>
@@ -65,7 +66,7 @@ export default function HomePage() {
             ) : (
               <div className="text-center py-12">
                 <p className="text-muted-foreground mb-4">
-                  No posts published yet.
+                  No posts published today.
                 </p>
                 <a
                   href="/auth"
