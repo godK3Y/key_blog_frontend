@@ -111,9 +111,9 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
+      <div className="pt-8">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <h3 className="text-4xl font-bold">Dashboard</h3>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
               Welcome, {mockUser.name}
@@ -126,7 +126,7 @@ export default function DashboardPage() {
             </Button>
           </div>
         </div>
-      </header>
+      </div>
 
       <main className="container mx-auto px-4 py-8">
         {showForm || editingPost ? (

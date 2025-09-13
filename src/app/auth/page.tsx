@@ -15,8 +15,13 @@ export default function AuthPage() {
     try {
       const result = await AuthService.login({ email, password });
       if (result?.success) {
-        const redirect = searchParams.get("redirect") || "/dashboard";
-        router.push(redirect);
+        // Refresh the page to update header with user info
+        window.location.reload();
+        // Then navigate to the intended destination
+        setTimeout(() => {
+          const redirect = searchParams.get("redirect") || "/dashboard";
+          router.push(redirect);
+        }, 100);
       } else {
         throw new Error("Invalid credentials");
       }
