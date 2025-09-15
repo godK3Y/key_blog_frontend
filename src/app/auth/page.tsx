@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
@@ -11,17 +11,29 @@ export default function AuthPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Redirect authenticated users away from auth page
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await AuthService.me();
+        // User is authenticated, redirect them
+        const redirect = searchParams.get("redirect") || "/dashboard";
+        router.push(redirect);
+      } catch (error) {
+        // User not authenticated, stay on auth page
+      }
+    };
+
+    checkAuth();
+  }, [router, searchParams]);
+
   const handleLogin = async (email: string, password: string) => {
     try {
       const result = await AuthService.login({ email, password });
       if (result?.success) {
-        // Refresh the page to update header with user info
-        window.location.reload();
-        // Then navigate to the intended destination
-        setTimeout(() => {
-          const redirect = searchParams.get("redirect") || "/dashboard";
-          router.push(redirect);
-        }, 100);
+        const redirect = searchParams.get("redirect") || "/dashboard";
+        // Navigate directly to the destination
+        window.location.href = redirect;
       } else {
         throw new Error("Invalid credentials");
       }

@@ -36,42 +36,69 @@ export function PostList({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="divide-y divide-border/40">
       {posts.map((post) => (
-        <Card key={post._id} className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <CardTitle className="text-xl">{post.title}</CardTitle>
-                <CardDescription>
-                  By{" "}
+        <article
+          key={post._id}
+          className="py-8 hover:bg-muted/20 transition-colors px-4 -mx-4 rounded-lg"
+        >
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {(typeof post.author === "string"
+                    ? post.author
+                    : post.author?.name || "Unknown"
+                  )
+                    .charAt(0)
+                    .toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">
                   {typeof post.author === "string"
                     ? post.author
-                    : post.author?.name || "Unknown"}{" "}
-                  •{" "}
+                    : post.author?.name || "Unknown"}
+                </p>
+                <p className="text-xs text-muted-foreground">
                   {post.createdAt &&
                     formatDistanceToNow(new Date(post.createdAt), {
                       addSuffix: true,
-                    })}
-                </CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={post.published ? "default" : "secondary"}>
-                  {post.published ? "Published" : "Draft"}
-                </Badge>
+                    })}{" "}
+                  • 5 min read
+                </p>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              {post.content.substring(0, 150)}...
-            </p>
+            {post.published ? null : (
+              <Badge variant="secondary" className="text-xs">
+                Draft
+              </Badge>
+            )}
+          </div>
 
-            {showActions && (
+          <div className="mb-4">
+            <h2
+              className="text-xl md:text-2xl font-bold text-foreground mb-2 leading-tight hover:text-foreground/80 cursor-pointer"
+              onClick={() => onView?.(post)}
+            >
+              {post.title}
+            </h2>
+            <p className="text-muted-foreground leading-relaxed line-clamp-2">
+              {post.content.substring(0, 200)}...
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <span className="text-xs text-muted-foreground">👏 12</span>
+              <span className="text-xs text-muted-foreground">💬 3</span>
+            </div>
+
+            {showActions ? (
               <div className="flex gap-2">
                 {onView && (
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => onView(post)}
                   >
@@ -80,7 +107,7 @@ export function PostList({
                 )}
                 {onEdit && (
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => onEdit(post)}
                   >
@@ -89,23 +116,29 @@ export function PostList({
                 )}
                 {onDelete && (
                   <Button
-                    variant="destructive"
+                    variant="ghost"
                     size="sm"
+                    className="text-destructive hover:text-destructive"
                     onClick={() => onDelete(post)}
                   >
                     Delete
                   </Button>
                 )}
               </div>
+            ) : (
+              onView && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => onView(post)}
+                >
+                  Read more
+                </Button>
+              )
             )}
-
-            {!showActions && onView && (
-              <Button variant="outline" onClick={() => onView(post)}>
-                Read More
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+        </article>
       ))}
     </div>
   );

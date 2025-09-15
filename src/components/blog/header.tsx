@@ -48,36 +48,70 @@ export function Header() {
   };
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <h1 className="text-2xl font-bold text-primary">KeyBlog</h1>
+    <header className="border-b border-border/40 bg-background">
+      <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-6xl">
+        <div className="flex items-center">
+          <h1
+            className="text-2xl font-bold text-foreground tracking-tight cursor-pointer"
+            onClick={() => router.push("/")}
+          >
+            KeyBlog
+          </h1>
         </div>
 
-        <nav className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => router.push("/")}>
+        <nav className="flex items-center space-x-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => router.push("/")}
+          >
             Home
           </Button>
 
           {isLoading ? (
-            <div className="w-20 h-8 bg-muted animate-pulse rounded"></div>
+            <div className="w-16 h-8 bg-muted animate-pulse rounded"></div>
           ) : user ? (
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">
-                Welcome, {user.email}
-              </span>
+            <>
               <Button
-                variant="outline"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
                 onClick={() => router.push("/dashboard")}
               >
-                Dashboard
+                Write
               </Button>
-              <Button variant="destructive" onClick={handleLogout}>
-                Logout
-              </Button>
-            </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-muted-foreground">
+                  {user.email}
+                </span>
+                <Button
+                  size="sm"
+                  className="rounded-full px-4"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </div>
+            </>
           ) : (
-            <Button onClick={() => router.push("/auth")}>Sign In</Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => router.push("/dashboard")}
+              >
+                Write
+              </Button>
+              <Button
+                size="sm"
+                className="rounded-full px-4"
+                onClick={() => router.push("/auth")}
+              >
+                Sign In
+              </Button>
+            </>
           )}
         </nav>
       </div>
