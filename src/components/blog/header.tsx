@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import AuthService, { type MeResponse } from "@/services/auth.service";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
 export function Header() {
   const router = useRouter();
@@ -113,6 +114,7 @@ export function Header() {
               </Button>
             </>
           )}
+          <ModeToggle />
         </nav>
       </div>
     </header>
