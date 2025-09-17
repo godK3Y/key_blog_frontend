@@ -68,7 +68,10 @@ async function update(
   const { data } = await api.put<PostItem>(`/posts/${id}`, payload);
   return data;
 }
-
+async function toggleLike(id: string): Promise<{ liked: boolean }> {
+  const { data } = await api.post<{ liked: boolean }>(`/posts/${id}/like`);
+  return data;
+}
 async function remove(id: string): Promise<{ deleted: boolean }> {
   const { data } = await api.delete<{ deleted: boolean }>(`/posts/${id}`);
   return data;
@@ -81,6 +84,7 @@ export const PostService = {
   findOneById,
   update,
   remove,
+  toggleLike,
 };
 
 export default PostService;
